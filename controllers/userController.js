@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const oAuth2Client = require('../config/oauth2Client')
 const nodemailer = require('nodemailer');
 const fs = require('fs');
+const {sendEmailUsingOAuth2} = require('../modules/email/emailSender')
 
 dotenv.config();
 
@@ -50,31 +51,6 @@ const generateUniqueToken = (length = 8) => {
           }
       });
   });
-};
-
-// extract this in different module..
-const sendEmailUsingOAuth2 = async (token) => {
-  try {
-    // Create a Nodemailer transporter with OAuth2 authentication
-    const transporter = await getTransporter();
-    const emailTemplate = fs.readFileSync('public/email-templates/verify-email.html', 'utf8');
-        // Replace the '{{ token }}' placeholder with the generated token in the email template
-    const formattedEmail = emailTemplate.replace('{{ token }}', token);
-    console.log(formattedEmail);
-    // Construct email message
-    const mailOptions = {
-      from: 'jain-dharamshaala@gmail.com',
-      to: "aashaysinghai26@gmail.com",
-      subject: 'Verify Email for Jain-Dharamshaala :)',
-      html: formattedEmail
-    };
-
-    // Send email
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent for verification :', info.response);
-  } catch (error) {
-    console.error('Error sending email:', error);
-  }
 };
 
 // Controller function to register a user

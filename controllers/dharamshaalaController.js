@@ -7,44 +7,7 @@ const oAuth2Client = require('../config/oauth2Client')
 const nodemailer = require('nodemailer');
 const { now } = require('mongoose');
 const logger = require('../config/logger')
-
-// Create a transporter using Gmail SMTP
-const getTransporter = async () => {
-  const accessToken = await oAuth2Client.getAccessToken();
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      type: 'OAuth2',
-      user: 'jain.dharamshaala@gmail.com',
-      clientId: process.env.GMAIL_CLIENT_ID,
-      clientSecret: process.env.GMAIL_CLIENT_SECRET,
-      refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-      accessToken: accessToken,
-    },
-    tls: {
-      rejectUnauthorized: true,
-    },
-  });
-  return transporter;
-}
-
-
-const sendBookingAcknowledgment = async (customerEmail) => {
-  try {
-      // Send email.
-      const transporter = await getTransporter();
-      await transporter.sendMail({
-          from: 'jain.dharamshaala@gmail.com',
-          to: customerEmail,
-          subject: 'Jain Dharamshaala Booking Acknowledgement',
-          html: '<p>Your booking has been acknowledged. Thank you for choosing our service!</p>'
-      });
-      console.log('Booking acknowledgment email sent successfully');
-  } catch (error) {
-      console.error('Failed to send booking acknowledgment email:', error);
-  }
-};
-
+const {sendBookingAcknowledgment} = require('../modules/email/emailSender')
 
 
 // Controller function to get all Dharamshaalas
