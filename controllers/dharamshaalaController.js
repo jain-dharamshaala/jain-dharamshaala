@@ -6,6 +6,7 @@ const Room = require('../models/Room');
 const oAuth2Client = require('../config/oauth2Client')
 const nodemailer = require('nodemailer');
 const { now } = require('mongoose');
+const logger = require('../config/logger')
 
 // Create a transporter using Gmail SMTP
 const getTransporter = async () => {
@@ -49,6 +50,8 @@ const sendBookingAcknowledgment = async (customerEmail) => {
 // Controller function to get all Dharamshaalas
 exports.getAllDharamshaalas = async (req, res) => {
   try {
+    logger.info('Info: Getting All DHaramshaala');
+    logger.debug('Debug: Getting All DHaramshaala');
     const dharamshaalas = await Dharamshaala.find();
     res.json(dharamshaalas);
   } catch (err) {
