@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer');
 const { now } = require('mongoose');
 const logger = require('../config/logger')
 const {sendBookingAcknowledgment} = require('../modules/email/emailSender')
+const {sendOtpViaSns} = require('../controllers/otpController')
 
 
 // Controller function to get all Dharamshaalas
@@ -25,7 +26,7 @@ exports.getAllDharamshaalas = async (req, res) => {
 // Controller function to create a new Dharamshaala
 exports.createDharamshaala = async (req, res) => {
   const options = { validateBeforeSave: false };
-  const images = req.files.map(file => file.filename);
+  const images = req.files.map(file => file.key);
   const dharamshaala = new Dharamshaala({
     name: req.body.name,
     description: req.body.description,
@@ -89,7 +90,8 @@ exports.getAllRoomsOfDharamshaala = async (req,res) => {
   try {
       let { dharamshaalaId} = req.params;
       const dharamshaala = await Dharamshaala.findById(dharamshaalaId).populate('rooms');
-      console.log(dharamshaala);
+      await sendOtpViaSns('+917892016435', '143');
+      console.log('SMS has been send sucessfully')
       if (!dharamshaala) {
           throw new Error('Dharamshaala not found');
       }
@@ -161,7 +163,7 @@ exports.reserveRoom = async (req,res) => {
       });
       const savedBooking = await booking.save();
       // disable email for now.
-      // sendBookingAcknowledgment('aashaysinghai26@gmail.com')
+      sendBookingAcknowledgment('aashaysinghai26@gmail.com')
       res.json(savedBooking);
   } catch (error) {
       throw new Error(`Failed to reserve room: ${error.message}`);

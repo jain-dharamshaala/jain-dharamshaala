@@ -9,7 +9,10 @@ const userSchema = new mongoose.Schema({
   contact_number: { type: String },
   password: { type: String, required: true },
   verified: { type: Boolean },
-  verificationToken: {type: String}
+  verificationToken: {type: String},
+  resetToken: {type: String},
+  resetTokenExpiry: {type: Date}
+  
 });
 
 // TODO use these hooks

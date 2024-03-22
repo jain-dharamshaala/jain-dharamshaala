@@ -13,6 +13,10 @@ const {sendEmailUsingOAuth2} = require('../modules/email/emailSender')
 
 dotenv.config();
 
+// Functionality
+
+
+
 const validateRegistration = [
   check("name").notEmpty().withMessage("Name is required"),
   check("email").isEmail().withMessage("Invalid email format"),
@@ -137,6 +141,45 @@ exports.getUserById = async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching users" });
   }
 };
+
+exports.getProfile = async (req, res) => {
+  try {
+    console.log(req.user);
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "An error occurred while fetching users" });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, email, contactNumber } = req.body;
+    if (!name || !email || !contactNumber) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+    let user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.name = name;
+    user.email = email;
+    user.contact_number = contactNumber;
+    // TODO handle the address later.
+
+    await user.save(); 
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+}
 
 
 exports.verifyEmail =  async (req, res) => {

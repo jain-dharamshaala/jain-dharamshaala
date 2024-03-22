@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const authenticateUser = require('../middleware/authenticateMiddleware');
 
 // Define routes for User functionalities
 router.post('/register', userController.registerUser);
@@ -10,9 +11,12 @@ router.get('/verify-email', userController.verifyEmail);
 router.get('/verification-success', (req, res) => {
     res.send('<h2>Email Verification Successful</h2><p>Your email address has been successfully verified.</p>');
 });
+router.get('/profile',authenticateUser, userController.getProfile);
+router.put('/profile',authenticateUser, userController.updateProfile);
 
 router.get('/', userController.getAllUsers);
 router.get('/:id', userController.getUserById);
+
 
 // TODO use session based authentication 
 // router.post('/logout', (req, res) => {

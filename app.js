@@ -8,6 +8,7 @@ const cors = require('cors');
 dotenv.config();
 
 // Import route files
+const authRoutes = require('./routes/authRoutes');
 const dharamshaalaRoutes = require('./routes/dharamshaalaRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
@@ -31,6 +32,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/dharamshaalas', dharamshaalaRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);

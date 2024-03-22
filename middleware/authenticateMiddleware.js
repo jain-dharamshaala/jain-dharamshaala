@@ -6,9 +6,14 @@ dotenv.config();
 
 const authenticateUser = (req, res, next) => {
   // Get the token from the request header
-  const token = req.header('Authorization');
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized - No token provided' });
+  const authHeader = req.header('Authorization');
+  if (!authHeader) {
+    return res.status(401).json({ message: 'Authorization header is missing' });
+  }
+
+  const [bearer, token] = authHeader.split(' ');
+  if (!token || bearer !== 'Bearer') {
+    return res.status(401).json({ message: 'Invalid Authorization header format' });
   }
 
   try {

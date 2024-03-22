@@ -59,3 +59,21 @@ const getTransporter = async () => {
       console.error('Error sending email:', error);
     }
   };
+
+  exports.sendPasswordResetEmail = async (email, resetToken) => {
+    try {
+      const transporter = await getTransporter();
+  
+      await transporter.sendMail({
+        from: 'jain-dharamshaala@gmail.com',
+        to: email,
+        subject: 'Password Reset',
+        html: `<p>You requested a password reset. Click <a href="http://localhost:9000/api/auth/reset-password?token=${resetToken}">here</a> to reset your password.</p>`
+      });
+  
+      console.log('Password reset email sent successfully');
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+      throw new Error('Failed to send password reset email');
+    }
+  };
