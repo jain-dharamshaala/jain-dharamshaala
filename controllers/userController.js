@@ -10,6 +10,7 @@ const oAuth2Client = require('../config/oauth2Client')
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const {sendEmailUsingOAuth2} = require('../modules/email/emailSender')
+const statusCodes = require("../utils/constants/statusCodes");
 
 dotenv.config();
 
@@ -62,11 +63,11 @@ exports.registerUser = async (req, res) => {
   // Check if the email is already registered
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(statusCodes.BAD_REQUEST).json({ errors: errors.array() });
   }
   const existingUser = await User.findOne({ email: req.body.email });
   if (existingUser) {
-    return res.status(400).json({ message: "Email is already registered" });
+    return res.status(statusCodes.BAD_REQUEST).json({ message: "Email is already registered" });
   }
   console.log("Sending verify-email with token.");
   const token = await generateUniqueToken();
@@ -91,27 +92,30 @@ exports.registerUser = async (req, res) => {
 
   try {
     const newUser = await user.save();
+    req.session.userId = user._id
     // TODO send welcome email upon sucessfull creation of account.
     //  and other notification for password reset and updating prifiles.
-    res.status(201).json(newUser);
+    res.status(statusCodes.CREATED).json(newUser);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(statusCodes.BAD_REQUEST).json({ message: err.message });
   }
 };
+
 
 // Controller function to login a user
 exports.loginUser = async (req, res) => {
   // Check if the email exists
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-    return res.status(400).json({ message: "Invalid email or password" });
+    return res.status(statusCodes.BAD_REQUEST).json({ message: "Invalid email or password" });
   }
 
   // Check if the password is correct
   const validPassword = await bcrypt.compare(req.body.password, user.password);
   if (!validPassword) {
-    return res.status(400).json({ message: "Invalid email or password" });
+    return res.status(statusCodes.BAD_REQUEST).json({ message: "Invalid email or password" });
   }
+  req.session.userId = user._id; 
 
   // Generate and send JWT token
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -121,15 +125,17 @@ exports.loginUser = async (req, res) => {
   res.json({ token });
 };
 
+
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.status(500).json({ error: "An error occurred while fetching users" });
+    res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ error: "An error occurred while fetching users" });
   }
 };
+
 
 exports.getUserById = async (req, res) => {
   try {
@@ -138,34 +144,36 @@ exports.getUserById = async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.status(500).json({ error: "An error occurred while fetching users" });
+    res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ error: "An error occurred while fetching users" });
   }
 };
 
+
 exports.getProfile = async (req, res) => {
   try {
-    console.log(req.user);
-    const user = await User.findById(req.user.id).select('-password');
+    console.log(req.session);
+    const user = await User.findById(req.session.userId).select('-password');
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(statusCodes.NOT_FOUND).json({ message: 'User not found' });
     }
     res.json(user);
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.status(500).json({ error: "An error occurred while fetching users" });
+    res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ error: "An error occurred while fetching users" });
   }
 };
+
 
 exports.updateProfile = async (req, res) => {
   try {
     const { name, email, contactNumber } = req.body;
     if (!name || !email || !contactNumber) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
+      return res.status(statusCodes.BAD_REQUEST).json({ message: 'Please provide all required fields' });
     }
 
-    let user = await User.findById(req.user.id);
+    let user = await User.findById(req.session.userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(statusCodes.NOT_FOUND).json({ message: 'User not found' });
     }
 
     user.name = name;
@@ -177,9 +185,10 @@ exports.updateProfile = async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(statusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
   }
-}
+};
+
 
 
 exports.verifyEmail =  async (req, res) => {
@@ -191,7 +200,7 @@ exports.verifyEmail =  async (req, res) => {
         console.log(user);
 
         if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
+            return res.status(statusCodes.BAD_REQUEST).json({ message: 'Invalid or expired token' });
         }
 
         // Mark the user as verified and clear the verification token
@@ -203,6 +212,23 @@ exports.verifyEmail =  async (req, res) => {
         res.redirect('/api/users/verification-success');
     } catch (error) {
         console.error('Error verifying email:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
-}
+};
+
+
+exports.logoutUser = (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Error logging out:', err);
+      res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+    } else {
+      res.json({ message: 'Logout successful' });
+    }
+  });
+};
+
+
+exports.verificationSuccess = (req, res) => {
+  res.send('<h2>Email Verification Successful</h2><p>Your email address has been successfully verified.</p>');
+};

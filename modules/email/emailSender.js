@@ -67,8 +67,9 @@ const getTransporter = async () => {
       await transporter.sendMail({
         from: 'jain-dharamshaala@gmail.com',
         to: email,
-        subject: 'Password Reset',
-        html: `<p>You requested a password reset. Click <a href="http://localhost:9000/api/auth/reset-password?token=${resetToken}">here</a> to reset your password.</p>`
+        subject: 'Jain Dharamshaala : Password Reset',
+        html: `<p>You requested a password reset. Click <a href="http://localhost:9000/api/auth/verify-reset-token?token=${resetToken}&email=${email}">here</a> to reset your password.</p>`
+        
       });
   
       console.log('Password reset email sent successfully');

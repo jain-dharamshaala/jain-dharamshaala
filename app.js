@@ -1,11 +1,12 @@
 // app.js
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const cors = require('cors');
+const session = require('express-session');
+const passport = require('./config/googleAuthStrategy')
+const MongoStore = require('connect-mongo');
 
-// Load environment variables
-dotenv.config();
 
 // Import route files
 const authRoutes = require('./routes/authRoutes');
@@ -17,9 +18,19 @@ const userRoutes = require('./routes/userRoutes');
 // Initialize Express app
 const app = express();
 
+app.use(session({
+  secret: 'aahi', // Change this to a random secret key
+  resave: false,
+  saveUninitialized: false,
+  store : MongoStore.create({ mongoUrl: process.env.MONGODB_URI })
+}));
+
+
 // Middleware
 app.use(express.json());
 app.use(cors());
+app.use(passport.initialize());
+app.use(passport.session());
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
@@ -40,8 +51,8 @@ app.use('/api/users', userRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Internal Server Error' });
+  console.error(err);
+  res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
 });
 
 // Start the server

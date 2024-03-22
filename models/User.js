@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
   verified: { type: Boolean },
   verificationToken: {type: String},
   resetToken: {type: String},
-  resetTokenExpiry: {type: Date}
+  resetTokenExpiry: {type: Date},
+  googleId: {type: String}
   
 });
 

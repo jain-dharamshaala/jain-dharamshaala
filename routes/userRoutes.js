@@ -8,28 +8,17 @@ const authenticateUser = require('../middleware/authenticateMiddleware');
 router.post('/register', userController.registerUser);
 router.post('/login', userController.loginUser);
 router.get('/verify-email', userController.verifyEmail);
-router.get('/verification-success', (req, res) => {
-    res.send('<h2>Email Verification Successful</h2><p>Your email address has been successfully verified.</p>');
-});
+
+// want to extract the below implementation into a function in userCOntroller.js
+router.get('/verification-success', userController.verificationSuccess);
+
 router.get('/profile',authenticateUser, userController.getProfile);
 router.put('/profile',authenticateUser, userController.updateProfile);
 
 router.get('/', userController.getAllUsers);
 router.get('/:id', userController.getUserById);
 
-
-// TODO use session based authentication 
-// router.post('/logout', (req, res) => {
-//     // Destroy session on logout
-//     req.session.destroy((err) => {
-//       if (err) {
-//         console.error('Error logging out:', err);
-//         res.status(500).json({ message: 'Internal server error' });
-//       } else {
-//         res.json({ message: 'Logout successful' });
-//       }
-//     });
-//   });
+router.post('/logout', userController.logoutUser);
 
 // TODO implement password reset flow.
 
