@@ -9,7 +9,8 @@ const roomSchema = new mongoose.Schema({
   images: [{ type: String }],
   checkin_time: { type: String },
   checkout_time: { type: String },
-  status: { type: String, enum: ['available', 'booked'], default: 'available' }
+  status: { type: String, enum: ['available', 'booked','confirmed' ,'maintenance', 'reserved'], default: 'available' },
+  price: { type: Number },
 });
 
 const Room = mongoose.model('Room', roomSchema);

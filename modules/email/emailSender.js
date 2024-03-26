@@ -1,5 +1,6 @@
 const oAuth2Client = require('../../config/oauth2Client')
 const nodemailer = require('nodemailer');
+const fs = require('fs');
 
 const getTransporter = async () => {
     const accessToken = await oAuth2Client.getAccessToken();
@@ -43,6 +44,7 @@ const getTransporter = async () => {
       const transporter = await getTransporter();
       const emailTemplate = fs.readFileSync('public/email-templates/verify-email.html', 'utf8');
           // Replace the '{{ token }}' placeholder with the generated token in the email template
+          // TODO token undefined is going need to check this. later
       const formattedEmail = emailTemplate.replace('{{ token }}', token);
       console.log(formattedEmail);
       // Construct email message

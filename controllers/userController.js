@@ -94,7 +94,7 @@ exports.registerUser = async (req, res) => {
     const newUser = await user.save();
     req.session.userId = user._id
     // TODO send welcome email upon sucessfull creation of account.
-    //  and other notification for password reset and updating prifiles.
+    //  and other notification for password reset and updating profiles.
     res.status(statusCodes.CREATED).json(newUser);
   } catch (err) {
     res.status(statusCodes.BAD_REQUEST).json({ message: err.message });

@@ -1,12 +1,17 @@
-function calculateDaysBetweenDates(begin, end) {
-    const oneDay = 24 * 60 * 60 * 1000; // Number of milliseconds in a day
-    const startDate = new Date(begin);
-    const endDate = new Date(end);
+function calculateAge(dateOfBirth) {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
 
-    // Calculate the difference in days
-    const diffInDays = Math.round(Math.abs((startDate - endDate) / oneDay));
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
 
-    return diffInDays;
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+
+    return age;
 }
 
-module.exports = calculateDaysBetweenDates;
+const dateOfBirth = '1993-04-21';
+const age = calculateAge(dateOfBirth);
+console.log(age);

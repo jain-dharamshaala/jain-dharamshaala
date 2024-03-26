@@ -9,6 +9,7 @@ const { now } = require('mongoose');
 const logger = require('../config/logger')
 const {sendBookingAcknowledgment} = require('../modules/email/emailSender')
 const {sendOtpViaSns} = require('../controllers/otpController')
+const { validateDates } = require('../utils/datehelper');
 
 
 // Controller function to get all Dharamshaalas
@@ -140,36 +141,6 @@ exports.removeRoomFromDharamshaala = async (req,res) => {
   }
 };
 
-const numberOfNights = (checkinDate, checkoutDate) => {
-  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
-  const firstDate = new Date(checkinDate);
-  const secondDate = new Date(checkoutDate);
-  return Math.round(Math.abs((firstDate - secondDate) / oneDay));
-};
-
-exports.reserveRoom = async (req,res) => {
-  try {
-      const {checkinDate, checkoutDate, customerId, perNightPrice,dharamshaala_id} = req.body;
-      const {roomId} = req.params;
-      const booking = new Booking({
-          room_id: roomId,
-          dharamshaala_id: dharamshaala_id,
-          checkin_date: checkinDate,
-          checkout_date: checkoutDate,
-          customer_id: customerId,
-          per_night_price: perNightPrice,
-          total_price: perNightPrice * numberOfNights(checkinDate, checkoutDate),
-          status: 'confirmed' // Assuming it's confirmed upon reservation
-      });
-      const savedBooking = await booking.save();
-      // disable email for now.
-      sendBookingAcknowledgment('aashaysinghai26@gmail.com')
-      res.json(savedBooking);
-  } catch (error) {
-      throw new Error(`Failed to reserve room: ${error.message}`);
-  }
-};
-
 exports.unreserveRoom = async (req,res) => {
   try {
       const {bookingId} = req.params;
@@ -185,40 +156,6 @@ exports.unreserveRoom = async (req,res) => {
 };
 
 
-exports.acceptBooking = async (req,res) => {
-  try {
-      const {bookingId} = req.params;
-      const updatedBooking = await Booking.findByIdAndUpdate(
-          bookingId,
-          { status: 'confirmed' },
-          { new: true }
-      );
-      if (!updatedBooking) {
-          throw new Error('Booking not found');
-      }
-      res.json(updatedBooking);
-  } catch (error) {
-      throw new Error(`Failed to accept booking: ${error.message}`);
-  }
-};
-
-exports.rejectBooking = async (req,res) => {
-  try {
-    const {bookingId} = req.params;
-      const updatedBooking = await Booking.findByIdAndUpdate(
-          bookingId,
-          { status: 'cancelled' },
-          { new: true }
-      );
-      if (!updatedBooking) {
-          throw new Error('Booking not found');
-      }
-      return res.json(updatedBooking);
-  } catch (error) {
-      throw new Error(`Failed to reject booking: ${error.message}`);
-  }
-};
-
 exports.getBookingHistoryOfRoom = async (req,res) => {
   try {
       const {roomId} = req.params;
@@ -229,18 +166,74 @@ exports.getBookingHistoryOfRoom = async (req,res) => {
   }
 };
 
-exports.checkAvailability = async (dharamshaalaId, checkinDate, checkoutDate) => {
+exports.checkAvailability = async (dharamshaalaId, checkinDate, checkoutDate,needSegregatedRooms) => {
   try {
-      const bookings = await Booking.find({
+   
+
+      // Inside checkAvailability function
+      validateDates(checkinDate, checkoutDate);
+    const bookings = await Booking.find({
           dharamshaala_id: dharamshaalaId,
           checkin_date: { $lte: checkoutDate },
           checkout_date: { $gte: checkinDate }
       });
       const availableRooms = await Room.find({
+           dharamshaala_id : dharamshaalaId,
           _id: { $nin: bookings.map(booking => booking.room_id) }
       });
-      return availableRooms;
+      if (needSegregatedRooms) {
+        const segregatedRooms = {};
+        for (const room of availableRooms) {
+          const roomType = room.type;
+          if (!segregatedRooms[roomType]) {
+            segregatedRooms[roomType] = [];
+          }
+          segregatedRooms[roomType].push(room);
+        }
+        return segregatedRooms;
+      } else {
+        return availableRooms;
+      }
   } catch (error) {
       throw new Error(`Failed to check availability: ${error.message}`);
+  }
+};
+
+// Controller function to search Dharamshaalas by city and checkin/checkout dates
+
+exports.searchDharamshaalas = async (req, res) => {
+  try {
+    const { city, checkinDate, checkoutDate } = req.query;
+    const dharamshaalas = await Dharamshaala.find({ city });
+    const availableDharamshaalas = [];
+    if (checkinDate && checkoutDate) {
+      for (const dharamshaala of dharamshaalas) {
+        const availableRooms = await this.checkAvailability(dharamshaala._id, checkinDate, checkoutDate,false);
+        if (Object.keys(availableRooms).length > 0) {
+          availableDharamshaalas.push({
+            dharamshaala,
+            availableRooms : availableRooms.length
+          });
+        }
+      }
+    } else {
+      availableDharamshaalas = dharamshaalas;
+    }
+    res.json(availableDharamshaalas);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Controller function to get the current availability of rooms in a Dharamshaala for booking
+exports.getDharamshaalaCurrentAvailabilityForBooking = async (req, res) => {
+  try {
+    const {dharamshaalaId} = req.params
+    const { checkinDate, checkoutDate } = req.query;
+    const dharamshaala = await Dharamshaala.findById(dharamshaalaId); 
+    const availableRooms = await this.checkAvailability(dharamshaalaId, checkinDate, checkoutDate,true);
+    res.json({dharamshaala,availableRooms});
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
