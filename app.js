@@ -15,6 +15,7 @@ const dharamshaalaRoutes = require('./routes/dharamshaalaRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const userRoutes = require('./routes/userRoutes');
+const imageRoutes = require('./routes/imageRoutes');
 
 // Initialize Express app
 const app = express();
@@ -49,6 +50,7 @@ app.use('/api/dharamshaalas', dharamshaalaRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/images', imageRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

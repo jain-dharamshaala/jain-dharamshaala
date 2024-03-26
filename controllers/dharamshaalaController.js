@@ -204,7 +204,9 @@ exports.checkAvailability = async (dharamshaalaId, checkinDate, checkoutDate,nee
 
 exports.searchDharamshaalas = async (req, res) => {
   try {
+    // searchObject should be saved for future reference..
     const { city, checkinDate, checkoutDate } = req.query;
+    // can add number of guest also in query params and filter accordingly.
     const dharamshaalas = await Dharamshaala.find({ city });
     const availableDharamshaalas = [];
     if (checkinDate && checkoutDate) {
@@ -221,6 +223,16 @@ exports.searchDharamshaalas = async (req, res) => {
       availableDharamshaalas = dharamshaalas;
     }
     res.json(availableDharamshaalas);
+    // send address of dharamshaala also in response.
+    // implement "best_image" field in dharamshaala schema and send that also in response.
+    // cancellation policy can be added in response.
+    // category_wise_media->  file can have fields :  category=Room,Entrance,WashRoom, extension=jpg,type=image etc 
+    // lattitude & longitude.
+    // map_link
+
+    // Ratings model can be added to dharamshaala schema.
+      // count, value, rating_level, rating_break_up_count,
+    // restrictions can be added to dharamshaala schema.
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
