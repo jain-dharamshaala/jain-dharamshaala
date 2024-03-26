@@ -173,9 +173,10 @@ exports.checkAvailability = async (dharamshaalaId, checkinDate, checkoutDate,nee
       // Inside checkAvailability function
       validateDates(checkinDate, checkoutDate);
     const bookings = await Booking.find({
-          dharamshaala_id: dharamshaalaId,
-          checkin_date: { $lte: checkoutDate },
-          checkout_date: { $gte: checkinDate }
+        dharamshaala_id: dharamshaalaId,
+        checkin_date: { $lte: checkoutDate },
+        checkout_date: { $gte: checkinDate },
+        status: { $in: ['confirmed', 'pending'] }
       });
       const availableRooms = await Room.find({
            dharamshaala_id : dharamshaalaId,

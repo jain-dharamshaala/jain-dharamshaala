@@ -3,6 +3,7 @@ const Booking = require('../models/Booking');
 const moment = require('moment');
 
 const {numberOfNights} = require('../utils/bookingHelper')
+const {sendBookingAcknowledgment} = require('../modules/email/emailSender')
 
 // Controller function to search Dharamshaalas by dates
 exports.searchDharamshaalasByDates = async (req, res) => {
@@ -41,14 +42,14 @@ exports.bookRoom = async (req, res) => {
     const isRoomAvailable = await Booking.findOne({
       room_id: room_id,
       checkin_date: { $lt: checkoutDate },
-      checkout_date: { $gt: checkinDate }
+      checkout_date: { $gt: checkinDate },
+      status: { $in: ['pending', 'confirmed'] }
     });
     if (isRoomAvailable) {
       throw new Error('Room is not available for the selected dates');
     }
     const savedBooking = await booking.save();
-    // disable email for now.
-    // sendBookingAcknowledgment('aashaysinghai26@gmail.com')
+    sendBookingAcknowledgment(savedBooking,'pending')
     res.json(savedBooking);
 } catch (error) {
     console.log(error.message);
@@ -111,6 +112,7 @@ exports.acceptBooking = async (req,res) => {
       if (!updatedBooking) {
           throw new Error('Booking not found');
       }
+      sendBookingAcknowledgment(updatedBooking,'confirmed');
       res.json(updatedBooking);
   } catch (error) {
       throw new Error(`Failed to accept booking: ${error.message}`);
@@ -129,6 +131,7 @@ exports.rejectBooking = async (req,res) => {
       if (!updatedBooking) {
           throw new Error('Booking not found');
       }
+      sendBookingAcknowledgment(updatedBooking,'cancelled');
       return res.json(updatedBooking);
   } catch (error) {
       throw new Error(`Failed to reject booking: ${error.message}`);

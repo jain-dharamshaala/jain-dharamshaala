@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f6f6f6;
+    }
+    .email-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    }
+    .email-header {
+      text-align: center;
+      padding-bottom: 20px;
+    }
+    .email-body {
+      line-height: 1.5;
+      color: #333333;
+    }
+    .email-footer {
+      text-align: center;
+      padding-top: 20px;
+      color: #888888;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="email-header">
+      <h2>Booking No. {{ bookingId }}  : CONFIRMATION_PENDING</h2>
+    </div>
+    <div class="email-body">
+        <p>Dear {{ userName }},</p>
+        <p>We are delighted to inform you that your booking has been sucessfuly made and is pending to be confirmed by the Dharamshala. 
+            Please wait untill the Dharamshaala Manager will act upon your booking request. We look forward to your pleasant stay. Thank you for choosing our service!</p>
+        <p>For any doubts or queries.Feel free to contact us jain-dharamshaala@gmail.com</p>
+    </div>
+    <div class="email-footer">
+      <p>Jai Jinendra</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,5 +1,6 @@
 // app.js
 require('dotenv').config();
+require('module-alias/register');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
