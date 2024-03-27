@@ -201,7 +201,7 @@ exports.checkAvailability = async (dharamshaalaId, checkinDate, checkoutDate,nee
 };
 
 // Controller function to search Dharamshaalas by city and checkin/checkout dates
-
+// test
 exports.searchDharamshaalas = async (req, res) => {
   try {
     // searchObject should be saved for future reference..
