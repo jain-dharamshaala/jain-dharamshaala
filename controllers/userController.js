@@ -122,7 +122,7 @@ exports.loginUser = async (req, res) => {
     expiresIn: "1h",
   });
   // generate a seesion based authentication by "express-session" package.
-  res.json({ token });
+  res.json({ token,user });
 };
 
 

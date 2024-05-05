@@ -7,6 +7,7 @@ const dharamshaalaController = require('../controllers/dharamshaalaController');
 
 router.get('/search', dharamshaalaController.searchDharamshaalas);
 router.get('/:dharamshaalaId/get-availability', dharamshaalaController.getDharamshaalaCurrentAvailabilityForBooking);
+router.get('/cities', dharamshaalaController.getDharamshaalaCities);
 
 // Define routes for Dharamshaala CRUD operations
 router.get('/', dharamshaalaController.getAllDharamshaalas);

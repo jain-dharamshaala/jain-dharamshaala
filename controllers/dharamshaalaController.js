@@ -205,10 +205,11 @@ exports.checkAvailability = async (dharamshaalaId, checkinDate, checkoutDate,nee
 exports.searchDharamshaalas = async (req, res) => {
   try {
     // searchObject should be saved for future reference..
-    const { city, checkinDate, checkoutDate } = req.query;
+    const city = req.query.city || 'shravanbelgola';
+    const { checkinDate, checkoutDate } = req.query;
     // can add number of guest also in query params and filter accordingly.
     const dharamshaalas = await Dharamshaala.find({ city });
-    const availableDharamshaalas = [];
+    let availableDharamshaalas = [];
     if (checkinDate && checkoutDate) {
       for (const dharamshaala of dharamshaalas) {
         const availableRooms = await this.checkAvailability(dharamshaala._id, checkinDate, checkoutDate,false);
@@ -246,6 +247,15 @@ exports.getDharamshaalaCurrentAvailabilityForBooking = async (req, res) => {
     const dharamshaala = await Dharamshaala.findById(dharamshaalaId); 
     const availableRooms = await this.checkAvailability(dharamshaalaId, checkinDate, checkoutDate,true);
     res.json({dharamshaala,availableRooms});
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getDharamshaalaCities = async (req, res) => {
+  try {
+    const cities = await Dharamshaala.distinct('city');
+    res.json(cities);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
