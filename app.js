@@ -5,7 +5,7 @@ const app = express();
 const port = 3000;
 
 app.get('/greet/:name', (req, res) => {
-  res.send(`Hello ${req.params.name}!`);
+  res.send(`Hello ${req.params.name}! Hope you are doing good.`);
 });
 
 app.get('/age/:name', (req, res) => {
