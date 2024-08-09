@@ -1,0 +1,6 @@
+# docker build file
+docker build -t yourusername/node-app .
+docker push yourusername/node-app
+
+# k8s
+kubectl apply -f deployment.yaml.
