@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jain-dharamshaala-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: jain-dharamshaala
+  template:
+    metadata:
+      labels:
+        app: jain-dharamshaala
+    spec:
+      containers:
+      - name: jain-dharamshaala
+        image: your-ecr-repo-url/jain-dharamshaala:latest
+        ports:
+        - containerPort: 3000

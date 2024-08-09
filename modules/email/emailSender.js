@@ -39,25 +39,25 @@ const getTransporter = async () => {
 
 exports.sendBookingAcknowledgment = async (booking, status) => {
   try {
-    const emailTemplateFile = getEmailTemplateFile(status);
-    const emailTemplate = fs.readFileSync(emailTemplateFile, "utf8");
-    const customer = await User.findById(booking.customer_id);
-    let customerEmail = customer.email;
-    console.log(customerEmail + " fetched from customer object");
-    customerEmail = "aashaysinghai26@gmail.com";
-    const formattedEmail = emailTemplate
-      .replace("{{ bookingId }}", booking._id)
-      .replace("{{ userName }}", "Aahi");
-    const transporter = await getTransporter();
-    await transporter.sendMail({
-      from: "jain.dharamshaala@gmail.com",
-      to: customerEmail,
-      subject: `Jain Dharamshaala Booking ${booking._id} : ${status}`,
-      html: formattedEmail,
-    });
-    logger.info(
-      ` Booking Id (${booking._id} ) Acknowledgement (${status}) email sent successfully to : ${customerEmail}`
-    );
+    // const emailTemplateFile = getEmailTemplateFile(status);
+    // const emailTemplate = fs.readFileSync(emailTemplateFile, "utf8");
+    // const customer = await User.findById(booking.customer_id);
+    // let customerEmail = customer.email;
+    // console.log(customerEmail + " fetched from customer object");
+    // customerEmail = "aashaysinghai26@gmail.com";
+    // const formattedEmail = emailTemplate
+    //   .replace("{{ bookingId }}", booking._id)
+    //   .replace("{{ userName }}", "Aahi");
+    // const transporter = await getTransporter();
+    // await transporter.sendMail({
+    //   from: "jain.dharamshaala@gmail.com",
+    //   to: customerEmail,
+    //   subject: `Jain Dharamshaala Booking ${booking._id} : ${status}`,
+    //   html: formattedEmail,
+    // });
+    // logger.info(
+    //   ` Booking Id (${booking._id} ) Acknowledgement (${status}) email sent successfully to : ${customerEmail}`
+    // );
   } catch (error) {
     logger.error(
       `Booking Id (${booking._id} ) Acknowledgement (${status}) Email Failure : `,
